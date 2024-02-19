@@ -1,0 +1,9 @@
+{
+  "botToken": "telegram bot token",
+  "notionToken": "notion integration toke",
+  "notionPages": {
+    "[chatId from telegram]": {
+      "taskDB": "database from notion"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 
 import { Client } from '@notionhq/client';
 import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
-import { botToken, notionToken, notionPages } from './accountKey.json';
+import { botToken, notionToken, notionPages } from './settings.json';
 
 const TelegramBot = require('node-telegram-bot-api');
 const bot = new TelegramBot(botToken, {polling: true});
