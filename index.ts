@@ -17,19 +17,30 @@ bot.onText(/\/chatId/, (msg: any) => {
 bot.onText(/\/newDiscussion (.+)/, async (msg: any, match: string) => {
   const chatId = msg.chat.id;
   const username = msg.from.username
-  const dbId = notionPages[msg.chat.id]?.taskDB;
+  newDiscussion(chatId, username, match[1]);
+
+})
+
+bot.onText(/\/nD (.+)/, async (msg: any, match: string) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username
+  newDiscussion(chatId, username, match[1]);
+})
+
+function newDiscussion(chatId: string, username: string, task: string) {
+  const dbId = notionPages[chatId]?.taskDB;
   if (!dbId) {
     bot.sendMessage(chatId, 'Notion DB не найдена')
   } else {
-  createTask(match[1], username, dbId)
-    .then((createTaskResult) => {
-      const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
-      bot.sendMessage(chatId, createdTaskMessage)
-    })
-    .catch(e=> console.log(e))
+    createTask(task[1], username, dbId)
+      .then((createTaskResult) => {
+        const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
+        bot.sendMessage(chatId, createdTaskMessage)
+      })
+      .catch(e=> console.log(e))
   }
 
-})
+}
 
 function createTask(title: string, tgAuthor: string, dbId: string): Promise<CreatePageResponse> {
   return notion.pages.create({
