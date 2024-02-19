@@ -1,9 +1,0 @@
-version: "3"
-services:
-  nexus_tasks_bot:
-    build:
-      context: .
-networks:
-  reverse-proxy:
-    external:
-      name: reverse-proxy
