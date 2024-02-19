@@ -23,7 +23,7 @@ bot.onText(/\/newDiscussion (.+)/, async (msg: any, match: string) => {
 
 bot.onText(/\/nD (.+)/, async (msg: any, match: string) => {
   const chatId = msg.chat.id;
-  const username = msg.from.username
+  const username = msg.from.username;
   newDiscussion(chatId, username, match[1]);
 })
 
@@ -32,10 +32,15 @@ function newDiscussion(chatId: string, username: string, task: string) {
   if (!dbId) {
     bot.sendMessage(chatId, 'Notion DB не найдена')
   } else {
-    createTask(task[1], username, dbId)
+    createTask(task, username, dbId)
       .then((createTaskResult) => {
-        const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
-        bot.sendMessage(chatId, createdTaskMessage)
+        if (chatId[0] !== '-') {
+          const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
+          bot.sendMessage(chatId, createdTaskMessage)
+        } else {
+          const createdTaskMessage = 'Новая тема для обсуждения - (https://silent-watch-f7c.notion.site/' + convertTaskToUrl(createTaskResult) + ')';
+          bot.sendMessage(chatId, createdTaskMessage)
+        }
       })
       .catch(e=> console.log(e))
   }
@@ -69,7 +74,13 @@ function createTask(title: string, tgAuthor: string, dbId: string): Promise<Crea
             }
           }
         ]
-      }
+      },
+      Status: {
+        type: "select",
+        select: {
+          name: 'Backlog'
+        }
+      },
     }
 
   });
