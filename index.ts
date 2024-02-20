@@ -34,13 +34,8 @@ function newDiscussion(chatId: string, username: string, task: string) {
   } else {
     createTask(task, username, dbId)
       .then((createTaskResult) => {
-        if (String(chatId) !== '-1002022329011') {
-          const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
-          bot.sendMessage(chatId, createdTaskMessage)
-        } else {
-          const createdTaskMessage = 'Новая тема для обсуждения - (https://silent-watch-f7c.notion.site/' + convertTaskToUrl(createTaskResult) + ')';
-          bot.sendMessage(chatId, createdTaskMessage)
-        }
+        const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
+        bot.sendMessage('275559199', createdTaskMessage)
       })
       .catch(e=> console.log(e))
   }
