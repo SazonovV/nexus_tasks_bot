@@ -34,7 +34,7 @@ function newDiscussion(chatId: string, username: string, task: string) {
   } else {
     createTask(task, username, dbId)
       .then((createTaskResult) => {
-        if (chatId[0] !== '-') {
+        if (String(chatId) !== '-1002022329011') {
           const createdTaskMessage = 'Новая тема для обсуждения - (https://www.notion.so/' + convertTaskToUrl(createTaskResult) + ')';
           bot.sendMessage(chatId, createdTaskMessage)
         } else {
