@@ -1,12 +1,15 @@
 
 import { Client } from '@notionhq/client';
 import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
-import { botToken, notionToken, notionPages } from './settings.json';
+import { botToken, notionTokenNexus, notionTokenNexusLeads, notionPages } from './settings.json';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 
 const bot = new TelegramBot(botToken, {polling: true});
-const notion = new Client({
-  auth: notionToken
+const notionNexus = new Client({
+  auth: notionTokenNexus
+});
+const notionNexusLeads = new Client({
+  auth: notionTokenNexusLeads
 });
 
 bot.onText(/\/chatId/, (msg: any) => {
@@ -46,11 +49,10 @@ bot.onText(/\/ndcrit (.+)/, async (msg: Message, match: RegExpExecArray) => {
 })
 
 function newDiscussion(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
-  const dbId = notionPages[chatId]?.taskDB;
-  if (!dbId) {
+  if (chatId !== notionPages.nexusLeads.chatId && chatId !== notionPages.nexus.chatId) {
     bot.sendMessage(chatId, 'Notion DB не найдена')
   } else {
-    createTask(task, username, dbId, criticalFlag)
+    createTask(task, username, criticalFlag, chatId)
       .then(() => {
         const Reactions = [{ type: 'emoji', emoji: '👍' }];
         (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
@@ -60,10 +62,11 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
 
 }
 
-function createTask(title: string, tgAuthor: string, dbId: string, criticalFlag: boolean): Promise<CreatePageResponse> {
-  return notion.pages.create({
+function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<CreatePageResponse> {
+  const notionClient = chatId == notionPages.nexusLeads.chatId ? notionNexusLeads : notionNexus;
+  return notionClient.pages.create({
     parent: {
-      database_id: dbId
+      database_id: chatId == notionPages.nexusLeads.chatId ? notionPages.nexusLeads.taskDB : notionPages.nexus.taskDB
     },
     properties: {
       Name: {
