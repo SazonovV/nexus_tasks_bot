@@ -1,4 +1,3 @@
-
 import { Client } from '@notionhq/client';
 import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
 import { botToken, notionTokenNexus, notionTokenNexusLeads, notionPages } from './settings.json';
@@ -48,6 +47,16 @@ bot.onText(/\/ndcrit (.+)/, async (msg: Message, match: RegExpExecArray) => {
   newDiscussion(chatId, username, match[1], msg.message_id, true);
 })
 
+bot.onText(/\/tasks/, async (msg: Message) => {
+  const chatId = msg.chat.id;
+  if (chatId !== notionPages.nexusLeads.chatId && chatId !== notionPages.nexus.chatId) {
+    bot.sendMessage(chatId, 'Notion DB не найдена');
+    return;
+  }
+  
+  showTasksSummary(chatId);
+});
+
 function newDiscussion(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
   if (chatId !== notionPages.nexusLeads.chatId && chatId !== notionPages.nexus.chatId) {
     bot.sendMessage(chatId, 'Notion DB не найдена')
@@ -64,6 +73,20 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
 
 function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<CreatePageResponse> {
   const notionClient = chatId == notionPages.nexusLeads.chatId ? notionNexusLeads : notionNexus;
+  
+  fetch('http://localhost:3001/api/public/tasks', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title: title,
+      description: title,
+      boardId: chatId == notionPages.nexusLeads.chatId ? notionPages.nexusLeads.nexusBoardsDB : notionPages.nexus.nexusBoardsDB,
+      authorTelegramLogin: tgAuthor,
+    }),
+  }).catch(error => console.error('Error sending task to API:', error));
+
   return notionClient.pages.create({
     parent: {
       database_id: chatId == notionPages.nexusLeads.chatId ? notionPages.nexusLeads.taskDB : notionPages.nexus.taskDB
@@ -108,4 +131,33 @@ function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chat
     }
 
   });
+}
+
+async function showTasksSummary(chatId: number) {
+  const boardId = chatId == notionPages.nexusLeads.chatId 
+    ? notionPages.nexusLeads.nexusBoardsDB 
+    : notionPages.nexus.nexusBoardsDB;
+
+  try {
+    const response = await fetch(`http://localhost:3001/api/public/boards/${boardId}/tasks-summary`);
+    const data: { [key: string]: { title: string, description: string, status: string }[] } = await response.json();
+
+    // Форматируем сообщение
+    const message = Object.entries(data)
+      .map(([user, tasks]) => {
+        const tasksText = tasks
+          .map((task: { title: string, description: string, status: string }) => 
+            `${task.title} - ${task.description} - ${task.status}`
+          )
+          .join('\n');
+        return `${user}\n${tasksText}`;
+      })
+      .join('\n\n');
+
+    // Отправляем сообщение
+    await bot.sendMessage(chatId, message || 'Нет активных задач');
+  } catch (error) {
+    console.error('Error fetching tasks summary:', error);
+    await bot.sendMessage(chatId, 'Ошибка при получении списка задач');
+  }
 }
