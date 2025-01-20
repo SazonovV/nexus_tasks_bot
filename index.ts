@@ -74,7 +74,7 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
 function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<CreatePageResponse> {
   const notionClient = chatId == notionPages.nexusLeads.chatId ? notionNexusLeads : notionNexus;
   
-  fetch('http://localhost:3001/api/public/tasks', {
+  fetch('http://nexusboards.ru/api/public/tasks', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ async function showTasksSummary(chatId: number) {
     : notionPages.nexus.nexusBoardsDB;
 
   try {
-    const response = await fetch(`http://localhost:3001/api/public/boards/${boardId}/tasks-summary`);
+    const response = await fetch(`http://nexusboards.ru/api/public/boards/${boardId}/tasks-summary`);
     const data: { [key: string]: { title: string, description: string, status: string }[] } = await response.json();
 
     // Форматируем сообщение
