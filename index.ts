@@ -2,6 +2,7 @@ import { Client } from '@notionhq/client';
 import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
 import { botToken, notionTokenNexus, notionTokenNexusLeads, notionPages } from './settings.json';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
+import fetch from 'node-fetch';
 
 const bot = new TelegramBot(botToken, {polling: true});
 const notionNexus = new Client({
@@ -74,7 +75,7 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
 function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<CreatePageResponse> {
   const notionClient = chatId == notionPages.nexusLeads.chatId ? notionNexusLeads : notionNexus;
   
-  fetch('http://nexusboards.ru/api/public/tasks', {
+  fetch('https://nexusboards.ru/api/public/tasks', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -139,8 +140,14 @@ async function showTasksSummary(chatId: number) {
     : notionPages.nexus.nexusBoardsDB;
 
   try {
-    const response = await fetch(`http://nexusboards.ru/api/public/boards/${boardId}/tasks-summary`);
-    const data: { [key: string]: { title: string, description: string, status: string }[] } = await response.json();
+    const response = await fetch(`https://nexusboards.ru/api/public/boards/${boardId}/tasks-summary`);
+    const rawData = await response.json();
+    
+    if (typeof rawData !== 'object' || rawData === null) {
+      throw new Error('Invalid response format');
+    }
+    
+    const data = rawData as { [key: string]: { title: string, description: string, status: string }[] };
 
     // Форматируем сообщение
     const message = Object.entries(data)
