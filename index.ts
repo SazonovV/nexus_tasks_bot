@@ -3,6 +3,7 @@ import { CreatePageResponse } from "@notionhq/client/build/src/api-endpoints";
 import { botToken, notionTokenNexus, notionTokenNexusLeads, notionPages } from './settings.json';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import fetch from 'node-fetch';
+import cron from 'node-cron';
 
 const bot = new TelegramBot(botToken, {polling: true});
 const notionNexus = new Client({
@@ -10,6 +11,14 @@ const notionNexus = new Client({
 });
 const notionNexusLeads = new Client({
   auth: notionTokenNexusLeads
+});
+
+// Schedule task summary for Monday, Wednesday, and Friday at 10 AM
+cron.schedule('0 10 * * 1,3,5', () => {
+  // Send summary to Nexus Leads chat
+  showTasksSummary(notionPages.nexusLeads.chatId);
+  // Send summary to Nexus chat
+  showTasksSummary(notionPages.nexus.chatId);
 });
 
 bot.onText(/\/chatId/, (msg: any) => {
@@ -82,7 +91,6 @@ function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chat
     },
     body: JSON.stringify({
       title: title,
-      description: title,
       boardId: chatId == notionPages.nexusLeads.chatId ? notionPages.nexusLeads.nexusBoardsDB : notionPages.nexus.nexusBoardsDB,
       authorTelegramLogin: tgAuthor,
     }),
