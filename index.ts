@@ -157,7 +157,7 @@ async function showTasksSummary(chatId: number) {
             `${task.title} - ${task.description} - ${task.status}`
           )
           .join('\n');
-        return `${user}\n${tasksText}`;
+        return `@${user}\n${tasksText}`;
       })
       .join('\n\n');
 
