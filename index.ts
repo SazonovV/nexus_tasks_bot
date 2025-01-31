@@ -14,7 +14,7 @@ const notionNexusLeads = new Client({
 });
 
 // Schedule task summary for Monday, Wednesday, and Friday at 10 AM
-cron.schedule('0 10 * * 1,3,5', () => {
+cron.schedule('0 7 * * 1,3,5', () => {
   // Send summary to Nexus Leads chat
   showTasksSummary(notionPages.nexusLeads.chatId);
   // Send summary to Nexus chat
