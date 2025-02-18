@@ -161,6 +161,7 @@ async function showTasksSummary(chatId: number) {
     const message = Object.entries(data)
       .map(([user, tasks]) => {
         const tasksText = tasks
+          .filter((task: { status: string}) => task.status !== 'done')
           .map((task: { title: string, description: string, status: string }) => 
             `${task.title} - ${task.description} - ${task.status}`
           )
