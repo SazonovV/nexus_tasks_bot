@@ -45,6 +45,12 @@ bot.onText(/\/nd (.+)/, async (msg: Message, match: RegExpExecArray) => {
   newDiscussion(chatId, username, match[1], msg.message_id);
 })
 
+bot.onText(/\/ndRetro (.+)/, async (msg: Message, match: RegExpExecArray) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username;
+  newDiscussionRetro(chatId, username, match[1], msg.message_id);
+})
+
 bot.onText(/\/nDCrit (.+)/, async (msg: Message, match: RegExpExecArray) => {
   const chatId = msg.chat.id;
   const username = msg.from.username;
@@ -74,9 +80,38 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
     createTask(task, username, criticalFlag, chatId)
       .then(() => {
         const Reactions = [{ type: 'emoji', emoji: '👍' }];
+        if (username === 'ksanksanksan') {
+          Reactions.push({ type: 'emoji', emoji: '❤️' });
+        }
         (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
       })
       .catch(e=> console.log(e))
+  }
+
+}
+
+function newDiscussionRetro(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
+  if (chatId !== notionPages.nexusLeads.chatId && chatId !== notionPages.nexus.chatId) {
+    bot.sendMessage(chatId, 'Notion DB не найдена')
+  } else {
+    fetch('https://nexusboards.ru/api/public/tasks', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        title: task,
+        boardId: '6cd49c03-0fc7-11f0-bd40-52540023d762',
+        authorTelegramLogin: username,
+      }),
+    }).then(() => {
+        const Reactions = [{ type: 'emoji', emoji: '👍' }];
+        if (username === 'ksanksanksan') {
+          Reactions.push({ type: 'emoji', emoji: '❤️' });
+        }
+        (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
+      })
+      .catch(e=> console.error('Error sending task to API:', e))
   }
 
 }
