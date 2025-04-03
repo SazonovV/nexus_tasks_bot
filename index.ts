@@ -79,10 +79,7 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
   } else {
     createTask(task, username, criticalFlag, chatId)
       .then(() => {
-        const Reactions = [{ type: 'emoji', emoji: '👍' }];
-        if (username === 'ksanksanksan') {
-          Reactions.push({ type: 'emoji', emoji: '❤️' });
-        }
+        const Reactions = [{ type: 'emoji', emoji: username === 'ksanksanksan' ? '❤️' : '👍' }];
         (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
       })
       .catch(e=> console.log(e))
@@ -105,13 +102,8 @@ function newDiscussionRetro(chatId: number, username: string, task: string, msgI
         authorTelegramLogin: username,
       }),
     }).then(() => {
-        let reaction: { type: string, emoji: string }[];
-        if (username === 'ksanksanksan') {
-          reaction = [{ type: 'emoji', emoji: '❤️' }];
-        } else {
-          reaction = [{ type: 'emoji', emoji: '👍' }];
-        }
-        (bot as any).setMessageReaction(chatId, msgId, { reaction, is_big: true });
+        const Reactions = [{ type: 'emoji', emoji: username === 'ksanksanksan' ? '❤️' : '👍' }];
+        (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
       })
       .catch(e=> console.error('Error sending task to API:', e))
   }
