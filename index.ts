@@ -105,11 +105,13 @@ function newDiscussionRetro(chatId: number, username: string, task: string, msgI
         authorTelegramLogin: username,
       }),
     }).then(() => {
-        const Reactions = [{ type: 'emoji', emoji: '👍' }];
+        let reaction: { type: string, emoji: string };
         if (username === 'ksanksanksan') {
-          Reactions.push({ type: 'emoji', emoji: '❤️' });
+          reaction = { type: 'emoji', emoji: '❤️' };
+        } else {
+          reaction = { type: 'emoji', emoji: '👍' };
         }
-        (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
+        (bot as any).setMessageReaction(chatId, msgId, { reaction, is_big: true });
       })
       .catch(e=> console.error('Error sending task to API:', e))
   }
