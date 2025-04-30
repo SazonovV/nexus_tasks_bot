@@ -11,6 +11,8 @@ cron.schedule('0 7 * * 1,3,5', () => {
   Object.entries(chatPages).forEach(([chatId, _]) => showTasksSummary(Number(chatId)))
 });
 
+// Bot commands
+
 bot.onText(/\/chatId/, (msg: any) => {
   const chatId = msg.chat.id;
   console.log(chatId);
@@ -59,14 +61,34 @@ bot.onText(/\/tasks/, async (msg: Message) => {
   showTasksSummary(chatId);
 });
 
+bot.onText(/\/removeMe (.+)/, async (msg: Message, match: RegExpExecArray) => {
+  const chatId = msg.chat.id;
+  const username = msg.from.username
+  removeMeFromTask(chatId, username, match[1], msg.message_id);
+
+})
+
+// Functions
+
+function removeMeFromTask(chatId: number, username: string, taskId: string, msgId: number) {
+  fetch(`https://nexusboards.ru/api/tasks/${taskId}/assignee/${username}`)
+  .then(() => {
+    setMessageReaction(chatId, msgId, username);
+  })
+  .catch(e=> console.log(e))
+}
+
+function setMessageReaction(chatId: number, msgId: number, username: string) {
+  const Reactions = [{ type: 'emoji', emoji: username === 'ksanksanksan' ? '❤️' : '👍' }];
+  (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
+}
+
 function newDiscussion(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
   createTask(task, username, criticalFlag, chatId)
     .then(() => {
-      const Reactions = [{ type: 'emoji', emoji: username === 'ksanksanksan' ? '❤️' : '👍' }];
-      (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
+      setMessageReaction(chatId, msgId, username);
     })
     .catch(e=> console.log(e))
-
 }
 
 function newDiscussionRetro(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
@@ -81,11 +103,9 @@ function newDiscussionRetro(chatId: number, username: string, task: string, msgI
       authorTelegramLogin: username,
     }),
   }).then(() => {
-      const Reactions = [{ type: 'emoji', emoji: username === 'ksanksanksan' ? '❤️' : '👍' }];
-      (bot as any).setMessageReaction(chatId, msgId, { reaction: Reactions, is_big: true });
+      setMessageReaction(chatId, msgId, username);
     })
     .catch(e=> console.error('Error sending task to API:', e))
-
 }
 
 function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<any> {
