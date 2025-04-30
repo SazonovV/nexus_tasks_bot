@@ -149,7 +149,7 @@ async function showTasksSummary(chatId: number) {
       .join('\n\n');
 
     // Отправляем сообщение
-    await bot.sendMessage(chatId, message || 'Нет активных задач', { parse_mode: 'Markdown' });
+    await bot.sendMessage(chatId, message || 'Нет активных задач');
   } catch (error) {
     console.error('Error fetching tasks summary:', error);
     await bot.sendMessage(chatId, 'Ошибка при получении списка задач');
