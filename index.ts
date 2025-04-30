@@ -141,7 +141,7 @@ async function showTasksSummary(chatId: number) {
         const tasksText = tasks
           .filter((task: { status: string}) => task.status !== 'done')
           .map((task: { title: string, description: string, status: string, id: string }) => 
-            `${task.title} - ${task.description} - ${task.status} - \`\`\`/removeMe ${task.id}\`\`\``
+            `${task.title} - ${task.description} - ${task.status} - \`/removeMe ${task.id}\``
           )
           .join('\n');
         return `@${user}\n${tasksText}`;
