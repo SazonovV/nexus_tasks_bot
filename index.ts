@@ -141,15 +141,15 @@ async function showTasksSummary(chatId: number) {
         const tasksText = tasks
           .filter((task: { status: string}) => task.status !== 'done')
           .map((task: { title: string, description: string, status: string, id: string }) => 
-            `${task.title} - ${task.description} - ${task.status}`
+            `*${task.title}* - ${task.description} - ${task.status}`
           )
-          .join('\n');
+          .join('\n\n');
         return `@${user}\n${tasksText}`;
       })
-      .join('\n\n');
+      .join('\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
 
     // Отправляем сообщение
-    await bot.sendMessage(chatId, message || 'Нет активных задач');
+    await bot.sendMessage(chatId, message || 'Нет активных задач', { parse_mode: 'Markdown' });
   } catch (error) {
     console.error('Error fetching tasks summary:', error);
     await bot.sendMessage(chatId, 'Ошибка при получении списка задач');
