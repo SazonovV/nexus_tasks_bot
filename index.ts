@@ -141,10 +141,10 @@ async function showTasksSummary(chatId: number) {
         const tasksText = tasks
           .filter((task: { status: string}) => task.status !== 'done')
           .map((task: { title: string, description: string, status: string, id: string }) => 
-            `*${task.title}* - ${task.description} - ${task.status}`
+            `*${task.title.trim()}* - ${task.description} - ${task.status}`
           )
           .join('\n\n');
-        return `@${user}\n${tasksText}`;
+        return `@${user.replace(/_/gi, "\\_")}\n${tasksText}`;
       })
       .join('\n\n━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
 
