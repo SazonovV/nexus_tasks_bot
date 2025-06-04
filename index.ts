@@ -1,4 +1,4 @@
-import { botToken, chatPages } from './settings.json';
+import { botToken, chatPages, baseUrl } from './settings.json';
 import TelegramBot, { Message } from 'node-telegram-bot-api';
 import fetch from 'node-fetch';
 import cron from 'node-cron';
@@ -71,7 +71,7 @@ bot.onText(/\/removeMe (.+)/, async (msg: Message, match: RegExpExecArray) => {
 // Functions
 
 function removeMeFromTask(chatId: number, username: string, taskId: string, msgId: number) {
-  fetch(`https://nexusboards.ru/api/tasks/${taskId}/assignee/${username}`)
+  fetch(`${baseUrl}/tasks/${taskId}/assignee/${username}`)
   .then(() => {
     setMessageReaction(chatId, msgId, username);
   })
@@ -92,7 +92,7 @@ function newDiscussion(chatId: number, username: string, task: string, msgId: nu
 }
 
 function newDiscussionRetro(chatId: number, username: string, task: string, msgId: number, criticalFlag = false) {
-  fetch('https://nexusboards.ru/api/public/tasks', {
+  fetch(`${baseUrl}/public/tasks`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ function newDiscussionRetro(chatId: number, username: string, task: string, msgI
 }
 
 function createTask(title: string, tgAuthor: string, criticalFlag: boolean, chatId: number): Promise<any> {
-  return fetch('https://nexusboards.ru/api/public/tasks', {
+  return fetch(`${baseUrl}/public/tasks`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ async function showTasksSummary(chatId: number) {
   const boardId = chatPages[chatId].nexusBoardsDB;
 
   try {
-    const response = await fetch(`https://nexusboards.ru/api/public/boards/${boardId}/tasks-summary`);
+    const response = await fetch(`${baseUrl}/public/boards/${boardId}/tasks-summary`);
     const rawData = await response.json();
     
     if (typeof rawData !== 'object' || rawData === null) {
